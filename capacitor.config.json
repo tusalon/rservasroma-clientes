@@ -1,0 +1,12 @@
+{
+  "appId": "com.rservasroma.clientes",
+  "appName": "Rservasroma",
+  "webDir": "www",
+  "server": {
+    "url": "https://tusalon.github.io/rservasroma/",
+    "cleartext": false
+  },
+  "android": {
+    "allowMixedContent": false
+  }
+}

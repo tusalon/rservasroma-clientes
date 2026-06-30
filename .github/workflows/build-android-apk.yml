@@ -1,0 +1,71 @@
+name: Build Android APK Clientes
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-release-apk:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "21"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Sync Capacitor Android
+        run: npx cap sync android
+
+      - name: Decode keystore
+        shell: powershell
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          $bytes = [Convert]::FromBase64String($env:KEYSTORE_BASE64)
+          [IO.File]::WriteAllBytes("$PWD\android\app\rservasroma-clientes.keystore", $bytes)
+          Write-Host "Keystore restaurado"
+
+      - name: Build release APK
+        working-directory: android
+        shell: powershell
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          .\gradlew.bat assembleRelease `
+            "-Pandroid.injected.signing.store.file=$PWD\app\rservasroma-clientes.keystore" `
+            "-Pandroid.injected.signing.store.password=$env:KEYSTORE_PASSWORD" `
+            "-Pandroid.injected.signing.key.alias=$env:KEY_ALIAS" `
+            "-Pandroid.injected.signing.key.password=$env:KEY_PASSWORD"
+
+      - name: Rename APK
+        shell: powershell
+        run: |
+          New-Item -ItemType Directory -Force -Path apk-output
+          $apk = Get-ChildItem -Path android/app/build/outputs/apk -Recurse -Filter "*.apk" | Select-Object -First 1
+          if (-not $apk) {
+            Get-ChildItem -Path android/app/build -Recurse | Select-Object FullName
+            throw "No se encontro ningun APK generado"
+          }
+          Write-Host "APK encontrado: $($apk.FullName)"
+          Copy-Item $apk.FullName apk-output/rservasroma-clientes.apk
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: rservasroma-clientes-apk
+          path: apk-output/rservasroma-clientes.apk

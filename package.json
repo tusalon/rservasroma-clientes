@@ -1,0 +1,28 @@
+{
+  "name": "rservasroma-clientes",
+  "version": "1.0.0",
+  "description": "APK Android maestro para clientes de Rservasroma",
+  "scripts": {
+    "android:add": "npx cap add android",
+    "android:sync": "npx cap sync android && npm run android:icons",
+    "android:open": "npm run android:sync && npx cap open android",
+    "android:icons": "powershell -ExecutionPolicy Bypass -File scripts/apply-android-icons.ps1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tusalon/rservasroma-clientes.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/tusalon/rservasroma-clientes/issues"
+  },
+  "homepage": "https://github.com/tusalon/rservasroma-clientes#readme",
+  "devDependencies": {
+    "@capacitor/android": "^8.3.4",
+    "@capacitor/cli": "^8.3.4",
+    "@capacitor/core": "^8.3.4"
+  }
+}

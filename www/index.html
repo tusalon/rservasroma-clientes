@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rservasroma</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #1A1A1A;
+      color: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      text-align: center;
+    }
+    .logo {
+      width: 80px; height: 80px;
+      background: #FF1493;
+      border-radius: 20px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 36px;
+      margin-bottom: 24px;
+    }
+    h1 { font-size: 22px; margin-bottom: 12px; }
+    p  { color: #999; font-size: 15px; line-height: 1.5; max-width: 280px; }
+  </style>
+</head>
+<body>
+  <script>
+    // Si hay un salón guardado, abrirlo directamente
+    var lastSlug = localStorage.getItem('negocioSlug');
+    if (lastSlug) {
+      window.location.replace('https://tusalon.github.io/rservasroma/?s=' + lastSlug);
+    }
+  </script>
+  <div class="logo">💅</div>
+  <h1>Rservasroma</h1>
+  <p>Pide a tu salón el enlace de reservas para abrir tu perfil aquí.</p>
+</body>
+</html>
