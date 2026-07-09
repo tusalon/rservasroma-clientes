@@ -7,7 +7,7 @@ $source  = Join-Path $root "icons\icon-512x512.png"
 $resRoot = Join-Path $root "android\app\src\main\res"
 
 if (-not (Test-Path $source)) {
-    throw "No se encontro $source — copia el icono a icons/icon-512x512.png"
+    throw "No se encontro $source - copia el icono a icons/icon-512x512.png"
 }
 
 if (-not (Test-Path $resRoot)) {

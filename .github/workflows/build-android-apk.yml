@@ -29,6 +29,10 @@ jobs:
       - name: Sync Capacitor Android
         run: npx cap sync android
 
+      - name: Apply brand icons
+        shell: powershell
+        run: powershell -File scripts/apply-android-icons.ps1
+
       - name: Decode keystore
         shell: powershell
         env:
