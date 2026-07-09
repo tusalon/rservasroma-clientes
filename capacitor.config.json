@@ -2,6 +2,7 @@
   "appId": "com.rservasroma.clientes",
   "appName": "Rservasroma",
   "webDir": "www",
+  "appendUserAgent": "RservasromaClientes",
   "server": {
     "url": "https://tusalon.github.io/rservasroma/",
     "cleartext": false
