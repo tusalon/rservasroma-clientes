@@ -39,6 +39,17 @@
       font-size: 13px;
       margin-top: 12px;
     }
+    .open-link {
+      display: none;
+      margin-top: 18px;
+      background: #FF1493;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 12px;
+      padding: 12px 18px;
+      font-size: 14px;
+      font-weight: 700;
+    }
   </style>
 </head>
 <body>
@@ -47,6 +58,7 @@
     <h1 id="titulo">Esperando enlace</h1>
     <p id="mensaje">Abre el enlace de reservas que te envio tu salon. Esta app no carga ningun negocio sin enlace.</p>
     <p class="hint">Si ya tienes el enlace en WhatsApp, tocalo nuevamente.</p>
+    <a id="open-link" class="open-link" href="#">Abrir reservas</a>
   </main>
 
   <script>
@@ -120,9 +132,16 @@
 
         handled = true;
         clearStaleCaptureStorage();
+        var targetUrl = TARGET_BASE + '?s=' + encodeURIComponent(slug);
+        var openLink = document.getElementById('open-link');
         document.getElementById('titulo').textContent = 'Abriendo reservas';
         document.getElementById('mensaje').textContent = 'Estamos cargando el negocio del enlace.';
-        window.location.replace(TARGET_BASE + '?s=' + encodeURIComponent(slug));
+        if (openLink) openLink.href = targetUrl;
+        setTimeout(function () {
+          if (openLink) openLink.style.display = 'inline-flex';
+          document.getElementById('mensaje').textContent = 'Si no abre automaticamente, toca el boton.';
+        }, 3500);
+        window.location.replace(targetUrl);
         return true;
       }
 
