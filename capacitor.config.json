@@ -3,10 +3,6 @@
   "appName": "Rservasroma",
   "webDir": "www",
   "appendUserAgent": "RservasromaClientes",
-  "server": {
-    "url": "https://tusalon.github.io/rservasroma/",
-    "cleartext": false
-  },
   "android": {
     "allowMixedContent": false
   }

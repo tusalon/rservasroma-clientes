@@ -18,6 +18,12 @@
       padding: 24px;
       text-align: center;
     }
+    main {
+      width: min(100%, 360px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
     .logo {
       width: 80px; height: 80px;
       background: #FF1493;
@@ -28,18 +34,122 @@
     }
     h1 { font-size: 22px; margin-bottom: 12px; }
     p  { color: #999; font-size: 15px; line-height: 1.5; max-width: 280px; }
+    .hint {
+      color: #6f6f6f;
+      font-size: 13px;
+      margin-top: 12px;
+    }
   </style>
 </head>
 <body>
+  <main>
+    <div class="logo">R</div>
+    <h1 id="titulo">Esperando enlace</h1>
+    <p id="mensaje">Abre el enlace de reservas que te envio tu salon. Esta app no carga ningun negocio sin enlace.</p>
+    <p class="hint">Si ya tienes el enlace en WhatsApp, tocalo nuevamente.</p>
+  </main>
+
   <script>
-    // Si hay un salón guardado, abrirlo directamente
-    var lastSlug = localStorage.getItem('negocioSlug');
-    if (lastSlug) {
-      window.location.replace('https://tusalon.github.io/rservasroma/?s=' + lastSlug);
-    }
+    (function () {
+      var TARGET_BASE = 'https://tusalon.github.io/rservasroma/';
+      var handled = false;
+
+      function clearStaleCaptureStorage() {
+        try {
+          [
+            'negocioSlug',
+            'negocioId',
+            'negocioNombre',
+            'adminSlug',
+            'adminAuth',
+            'adminLoginTime',
+            'profesionalAuth',
+            'profesionalLoginTime'
+          ].forEach(function (key) {
+            localStorage.removeItem(key);
+          });
+
+          Object.keys(localStorage).forEach(function (key) {
+            if (/^(rsmid_|rsmttl_|codigoPaisTelefono:)/.test(key)) {
+              localStorage.removeItem(key);
+            }
+          });
+        } catch (error) {
+          // El capturador no depende del storage local.
+        }
+      }
+
+      function cleanSlug(value) {
+        return String(value || '')
+          .trim()
+          .replace(/^@+/, '')
+          .replace(/[^a-zA-Z0-9_-]/g, '')
+          .slice(0, 80);
+      }
+
+      function getSlugFromUrl(rawUrl) {
+        try {
+          if (!rawUrl) return '';
+
+          var url = new URL(rawUrl);
+          var slug = cleanSlug(url.searchParams.get('s'));
+
+          if (!slug && url.hash) {
+            var hashQuery = url.hash.indexOf('?') >= 0 ? url.hash.slice(url.hash.indexOf('?')) : '';
+            if (hashQuery) {
+              slug = cleanSlug(new URLSearchParams(hashQuery).get('s'));
+            }
+          }
+
+          if (!slug && url.pathname) {
+            var parts = url.pathname.split('/').filter(Boolean);
+            var appIndex = parts.indexOf('rservasroma');
+            if (appIndex >= 0 && parts[appIndex + 1]) {
+              slug = cleanSlug(parts[appIndex + 1]);
+            }
+          }
+
+          return slug;
+        } catch (error) {
+          return '';
+        }
+      }
+
+      function openBusiness(slug) {
+        if (handled || !slug) return false;
+
+        handled = true;
+        clearStaleCaptureStorage();
+        document.getElementById('titulo').textContent = 'Abriendo reservas';
+        document.getElementById('mensaje').textContent = 'Estamos cargando el negocio del enlace.';
+        window.location.replace(TARGET_BASE + '?s=' + encodeURIComponent(slug));
+        return true;
+      }
+
+      function handleIncomingUrl(rawUrl) {
+        return openBusiness(getSlugFromUrl(rawUrl));
+      }
+
+      if (handleIncomingUrl(window.location.href)) return;
+
+      clearStaleCaptureStorage();
+
+      var App = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App;
+
+      if (App && App.getLaunchUrl) {
+        App.getLaunchUrl()
+          .then(function (result) {
+            if (result && result.url) handleIncomingUrl(result.url);
+          })
+          .catch(function () {});
+      }
+
+      if (App && App.addListener) {
+        App.addListener('appUrlOpen', function (event) {
+          if (event && event.url) handleIncomingUrl(event.url);
+        });
+      }
+    })();
   </script>
-  <div class="logo">💅</div>
-  <h1>Rservasroma</h1>
-  <p>Pide a tu salón el enlace de reservas para abrir tu perfil aquí.</p>
 </body>
 </html>
