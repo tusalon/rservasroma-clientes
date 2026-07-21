@@ -26,6 +26,17 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Restore Firebase configuration
+        shell: powershell
+        env:
+          ANDROID_GOOGLE_SERVICES_JSON: ${{ secrets.ANDROID_GOOGLE_SERVICES_JSON }}
+        run: |
+          if (-not $env:ANDROID_GOOGLE_SERVICES_JSON) {
+            throw "Falta el secreto ANDROID_GOOGLE_SERVICES_JSON para la APK de clientes"
+          }
+          $env:ANDROID_GOOGLE_SERVICES_JSON | Set-Content -Path android/app/google-services.json -Encoding UTF8
+          Write-Host "google-services.json restaurado"
+
       - name: Sync Capacitor Android
         run: npx cap sync android
 
