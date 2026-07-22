@@ -4,6 +4,7 @@
   "webDir": "www",
   "appendUserAgent": "RservasromaClientes",
   "server": {
+    "url": "https://tusalon.github.io/rservasroma/app-clientes.html",
     "allowNavigation": [
       "tusalon.github.io"
     ]
