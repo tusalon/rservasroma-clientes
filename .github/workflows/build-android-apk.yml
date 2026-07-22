@@ -79,6 +79,19 @@ jobs:
           Write-Host "APK encontrado: $($apk.FullName)"
           Copy-Item $apk.FullName apk-output/rservasroma-clientes.apk
 
+      - name: Verify APK signature
+        shell: powershell
+        run: |
+          $apksigner = Get-ChildItem -Path "$env:ANDROID_HOME\build-tools" -Recurse -Filter "apksigner.bat" -ErrorAction SilentlyContinue |
+                       Sort-Object FullName -Descending | Select-Object -First 1
+          if (-not $apksigner) {
+            throw "No se encontro apksigner para verificar la APK"
+          }
+          & $apksigner.FullName verify --verbose --print-certs apk-output/rservasroma-clientes.apk
+          if ($LASTEXITCODE -ne 0) {
+            throw "La APK de clientes no tiene una firma valida"
+          }
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
