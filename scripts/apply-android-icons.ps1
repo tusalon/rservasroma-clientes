@@ -1,51 +1,22 @@
 $ErrorActionPreference = "Stop"
 
-Add-Type -AssemblyName System.Drawing
+# Copia los iconos y el splash de la APK ya generados (icons/android/res) a la
+# carpeta Android. Se generan en el repo rservasroma (python tools/marca/generar_marca.py) y se copian aqui.
+# Antes se reescalaba el icono de 512 a todos los tamanos, pero el icono
+# adaptable de Android necesita otro encuadre (lienzo de 108 dp) y salia cortado.
 
-$root    = Split-Path -Parent $PSScriptRoot
-$source  = Join-Path $root "icons\icon-512x512.png"
+$root = Split-Path -Parent $PSScriptRoot
+$source = Join-Path $root "icons\android\res"
 $resRoot = Join-Path $root "android\app\src\main\res"
 
 if (-not (Test-Path $source)) {
-    throw "No se encontro $source - copia el icono a icons/icon-512x512.png"
+    throw "No se encontro $source. Copialo desde rservasroma/icons/android"
 }
 
 if (-not (Test-Path $resRoot)) {
     throw "No se encontro la carpeta Android. Ejecuta primero: npm run android:add"
 }
 
-$sizes = @{
-    "mipmap-mdpi"    = 48
-    "mipmap-hdpi"    = 72
-    "mipmap-xhdpi"   = 96
-    "mipmap-xxhdpi"  = 144
-    "mipmap-xxxhdpi" = 192
-}
+Copy-Item -Path (Join-Path $source "*") -Destination $resRoot -Recurse -Force
 
-function Save-ResizedPng($sourcePath, $targetPath, $size) {
-    $image = [System.Drawing.Image]::FromFile($sourcePath)
-    try {
-        $bitmap = New-Object System.Drawing.Bitmap $size, $size
-        try {
-            $g = [System.Drawing.Graphics]::FromImage($bitmap)
-            try {
-                $g.InterpolationMode = [System.Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic
-                $g.SmoothingMode     = [System.Drawing.Drawing2D.SmoothingMode]::HighQuality
-                $g.PixelOffsetMode   = [System.Drawing.Drawing2D.PixelOffsetMode]::HighQuality
-                $g.Clear([System.Drawing.Color]::Transparent)
-                $g.DrawImage($image, 0, 0, $size, $size)
-            } finally { $g.Dispose() }
-            $bitmap.Save($targetPath, [System.Drawing.Imaging.ImageFormat]::Png)
-        } finally { $bitmap.Dispose() }
-    } finally { $image.Dispose() }
-}
-
-foreach ($density in $sizes.Keys) {
-    $dir = Join-Path $resRoot $density
-    if (-not (Test-Path $dir)) { New-Item -ItemType Directory -Path $dir | Out-Null }
-    foreach ($name in @("ic_launcher.png", "ic_launcher_round.png", "ic_launcher_foreground.png")) {
-        Save-ResizedPng $source (Join-Path $dir $name) $sizes[$density]
-    }
-}
-
-Write-Host "Android icons aplicados desde $source"
+Write-Host "Android icons updated from $source"
